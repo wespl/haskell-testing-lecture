@@ -14,6 +14,10 @@ data Graph a = Graph {
 removeEdge :: Eq a => (a, a) -> Graph a -> Graph a
 removeEdge x (Graph v e) = Graph v (filter (/= x) e)
 
+removeVertexEdges :: Eq a => a -> Graph a -> Graph a
+removeVertexEdges x (Graph v e) =
+  Graph (filter (/= x) v) (filter (\(m,n) -> not $ x `elem` [m, n]) e)
+
 connections :: Eq a => ((a, a) -> a) -> a -> Graph a -> [(a, a)]
 connections f x (Graph _ e) = filter ((== x) . f) e
 
