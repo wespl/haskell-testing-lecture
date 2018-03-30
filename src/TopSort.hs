@@ -1,14 +1,15 @@
-{-# LANGUAGE DeriveFunctor #-}
+{-# LANGUAGE DeriveFunctor, DeriveGeneric #-}
 -- | Adapted from
 -- | http://5outh.blogspot.com/2012/12/graphs-and-topological-sorting-in.html
 module TopSort where
 
+import GHC.Generics
 import Data.List (nub)
 
 data Graph a = Graph {
     vertices :: [a]
   , edges :: [(a, a)]
-  } deriving (Show, Functor)
+  } deriving (Show, Functor, Generic)
 
 removeEdge :: Eq a => (a, a) -> Graph a -> Graph a
 removeEdge x (Graph v e) = Graph v (filter (/= x) e)
@@ -33,12 +34,12 @@ graphFromFile f = do
       graph  = Graph verts conns
   return graph
 
-tsort :: (Monad m, Eq a) => Graph a -> m [a]
-tsort graph  = tsort' [] (noInbound graph) graph
+topSort :: (Monad m, Eq a) => Graph a -> m [a]
+topSort graph  = tsort [] (noInbound graph) graph
   where noInbound (Graph v e) = filter (flip notElem $ map snd e) v
-        tsort' l []    (Graph _ []) = return $ reverse l
-        tsort' l []    _            = fail "Cyclic graph"
-        tsort' l (n:s) g            = tsort' (n:l) s' g'
+        tsort l []    (Graph _ []) = return $ reverse l
+        tsort l []    _            = fail "Cyclic graph"
+        tsort l (n:s) g            = tsort (n:l) s' g'
           where outEdges = outbound n g
                 outNodes = map snd outEdges
                 g'       = foldr removeEdge g outEdges
